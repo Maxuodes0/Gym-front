@@ -38,7 +38,7 @@ function MetricRing({
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
-      className="flex min-h-48 flex-col items-center justify-center rounded-lg border border-white/10 bg-[#20292e] px-2 py-4 shadow-premium sm:min-h-64 sm:px-4 sm:py-8"
+      className="flex min-h-44 flex-col items-center justify-center px-1 py-3 sm:min-h-64 sm:px-4 sm:py-8"
     >
       <div className="relative grid h-24 w-24 place-items-center min-[390px]:h-28 min-[390px]:w-28 sm:h-48 sm:w-48 lg:h-60 lg:w-60">
         <svg viewBox="0 0 220 220" className="h-full w-full -rotate-90">
@@ -58,7 +58,7 @@ function MetricRing({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="text-2xl font-semibold leading-none tracking-normal text-white min-[390px]:text-3xl sm:text-5xl lg:text-6xl">
+          <p className="text-xl font-semibold leading-none tracking-normal text-white min-[390px]:text-2xl sm:text-4xl lg:text-5xl">
             {value}
           </p>
         </div>
