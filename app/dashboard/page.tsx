@@ -38,9 +38,9 @@ function MetricRing({
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
-      className="flex min-h-80 flex-col items-center justify-center rounded-lg border border-white/10 bg-[#20292e] px-4 py-8 shadow-premium"
+      className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-white/10 bg-[#20292e] px-2 py-4 shadow-premium sm:min-h-64 sm:px-4 sm:py-8"
     >
-      <div className="relative grid h-64 w-64 place-items-center">
+      <div className="relative grid h-24 w-24 place-items-center min-[390px]:h-28 min-[390px]:w-28 sm:h-52 sm:w-52 lg:h-64 lg:w-64">
         <svg viewBox="0 0 220 220" className="h-full w-full -rotate-90">
           <circle cx="110" cy="110" r={radius} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="14" />
           <motion.circle
@@ -58,9 +58,15 @@ function MetricRing({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="max-w-[11rem] text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{label}</p>
-          <p className="mt-2 text-5xl font-semibold leading-none tracking-normal text-white md:text-6xl">{value}</p>
-          <p className="mt-3 text-sm font-medium text-white/50">{detail}</p>
+          <p className="max-w-[5.5rem] text-[8px] font-semibold uppercase tracking-[0.12em] text-white/45 sm:max-w-[11rem] sm:text-[10px] sm:tracking-[0.18em]">
+            {label}
+          </p>
+          <p className="mt-1 text-xl font-semibold leading-none tracking-normal text-white min-[390px]:text-2xl sm:mt-2 sm:text-4xl lg:text-6xl">
+            {value}
+          </p>
+          <p className="mt-1 max-w-[5.8rem] text-[8px] font-medium leading-tight text-white/50 sm:mt-3 sm:max-w-[11rem] sm:text-sm">
+            {detail}
+          </p>
         </div>
       </div>
     </motion.div>
@@ -109,7 +115,7 @@ export default function DashboardPage() {
         </div>
       ) : summary ? (
         <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <MetricRing
               label="Weight"
               value={summary.latest ? Number(summary.latest.weight).toFixed(2) : "--"}
