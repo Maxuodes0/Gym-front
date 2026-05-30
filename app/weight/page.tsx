@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Edit3, Plus, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/layout/empty-state";
-import { StatCard } from "@/components/layout/stat-card";
+import { clamp, MetricRing } from "@/components/layout/metric-ring";
 import { MetricLineChart } from "@/components/charts/metric-line-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,11 +117,20 @@ export default function WeightPage() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-[0.78fr_1.22fr]">
           <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <StatCard label="Current Weight" value={latest ? `${Number(latest.weight).toFixed(2)} kg` : "--"} />
-              <StatCard label="Weight Change" value={previous ? signedNumber(weightChange, " kg", 2) : "--"} />
-              <StatCard label="Current Body Fat" value={latest ? `${Number(latest.body_fat_percentage).toFixed(1)}%` : "--"} />
-              <StatCard label="Body Fat Change" value={previous ? signedNumber(bodyFatChange, "%") : "--"} />
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+              <MetricRing
+                label="Weight"
+                value={latest ? Number(latest.weight).toFixed(2) : "--"}
+                detail={previous ? `${signedNumber(weightChange, " kg", 2)} change` : "kg"}
+                progress={latest ? clamp((Number(latest.weight) / 120) * 100, 8, 96) : 0}
+              />
+              <MetricRing
+                label="Body Fat"
+                value={latest ? `${Number(latest.body_fat_percentage).toFixed(1)}%` : "--"}
+                detail={previous ? `${signedNumber(bodyFatChange, "%")} change` : "current percentage"}
+                progress={latest ? clamp(100 - Number(latest.body_fat_percentage) * 2.2, 12, 92) : 0}
+                accent="#B7BDC1"
+              />
             </div>
 
             <Card>

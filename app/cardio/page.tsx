@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Edit3, HeartPulse, Plus, Timer, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/layout/empty-state";
-import { StatCard } from "@/components/layout/stat-card";
+import { clamp, MetricRing } from "@/components/layout/metric-ring";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -115,11 +115,21 @@ export default function CardioPage() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-[0.78fr_1.22fr]">
           <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <StatCard label="Total Time" value={`${stats.totalMinutes.toFixed(0)} min`} />
-              <StatCard label="Sessions" value={`${stats.sessions}`} />
-              <StatCard label="Last Session" value={stats.latest ? `${Number(stats.latest.duration_minutes).toFixed(0)} min` : "--"} />
-              <StatCard label="Machines" value={`${stats.uniqueMachines}`} />
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+              <MetricRing
+                label="Total Time"
+                value={stats.totalMinutes.toFixed(0)}
+                detail="minutes"
+                progress={clamp((stats.totalMinutes / 300) * 100, 8, 96)}
+                accent="#409BF2"
+              />
+              <MetricRing
+                label="Sessions"
+                value={`${stats.sessions}`}
+                detail={`${stats.uniqueMachines} machines`}
+                progress={clamp((stats.sessions / 12) * 100, 8, 96)}
+                accent="#B7BDC1"
+              />
             </div>
 
             <Card>
