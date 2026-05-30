@@ -1,7 +1,17 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export async function signInWithPassword(email: string, password: string) {
+const usernameAliases: Record<string, string> = {
+  xebec: "xebec@tura.app"
+};
+
+function normalizeLoginIdentifier(identifier: string) {
+  const value = identifier.trim();
+  return usernameAliases[value.toLowerCase()] ?? value;
+}
+
+export async function signInWithPassword(identifier: string, password: string) {
   const supabase = getSupabaseBrowserClient();
+  const email = normalizeLoginIdentifier(identifier);
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) throw error;

@@ -12,7 +12,7 @@ import { signInWithPassword } from "@/services/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signInWithPassword(email, password);
+      await signInWithPassword(username, password);
       router.replace("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in.");
@@ -54,8 +54,15 @@ export default function LoginPage() {
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              type="text"
+              autoComplete="username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
