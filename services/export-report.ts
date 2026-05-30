@@ -1,6 +1,8 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { CardioLog, Exercise, WeightLog, WorkoutWithLogs } from "@/types/domain";
 
+const hiddenExercises = new Set(["Push A::Cable Crossover (Low to High)"]);
+
 function reportDateStamp() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -44,7 +46,9 @@ export async function downloadUserExcelReport() {
   const weightLogs = (weightResult.data ?? []) as WeightLog[];
   const cardioLogs = (cardioResult.data ?? []) as CardioLog[];
   const workouts = (workoutsResult.data ?? []) as unknown as WorkoutWithLogs[];
-  const exercises = (exercisesResult.data ?? []) as Exercise[];
+  const exercises = ((exercisesResult.data ?? []) as Exercise[]).filter(
+    (exercise) => !hiddenExercises.has(`${exercise.workout_type}::${exercise.name}`)
+  );
 
   const totalCardioMinutes = cardioLogs.reduce((sum, log) => sum + (asNumber(log.duration_minutes) ?? 0), 0);
   const trainingDays = workouts.filter((workout) => !workout.is_rest_day).length;

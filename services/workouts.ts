@@ -2,6 +2,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { getCurrentUserId } from "@/services/auth";
 import type { Exercise, ExerciseLog, Workout, WorkoutType, WorkoutWithLogs } from "@/types/domain";
 
+const hiddenExercises = new Set(["Push A::Cable Crossover (Low to High)"]);
+
 export type SetInput = {
   exercise_id: string;
   set_number: number;
@@ -18,7 +20,7 @@ export async function getExercises(workoutType: WorkoutType) {
     .order("sort_order", { ascending: true });
 
   if (error) throw error;
-  return data as Exercise[];
+  return (data as Exercise[]).filter((exercise) => !hiddenExercises.has(`${exercise.workout_type}::${exercise.name}`));
 }
 
 export async function getWorkouts() {
