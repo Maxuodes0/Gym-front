@@ -61,8 +61,8 @@ export default function DashboardPage() {
             <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}>
               <StatCard
                 label="Current Weight"
-                value={summary.latest ? `${Number(summary.latest.weight).toFixed(1)} kg` : "--"}
-                change={summary.previous ? signedNumber(weightChange, " kg") : undefined}
+                value={summary.latest ? `${Number(summary.latest.weight).toFixed(2)} kg` : "--"}
+                change={summary.previous ? signedNumber(weightChange, " kg", 2) : undefined}
               />
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}>

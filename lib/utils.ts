@@ -20,8 +20,8 @@ export function formatShortDate(value: string | Date) {
   }).format(new Date(value));
 }
 
-export function signedNumber(value: number, suffix = "") {
+export function signedNumber(value: number, suffix = "", decimals = 1) {
   if (!Number.isFinite(value)) return `0${suffix}`;
   const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(1)}${suffix}`;
+  return `${sign}${value.toFixed(decimals)}${suffix}`;
 }

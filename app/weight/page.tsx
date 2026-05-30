@@ -118,8 +118,8 @@ export default function WeightPage() {
         <div className="grid gap-4 lg:grid-cols-[0.78fr_1.22fr]">
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <StatCard label="Current Weight" value={latest ? `${Number(latest.weight).toFixed(1)} kg` : "--"} />
-              <StatCard label="Weight Change" value={previous ? signedNumber(weightChange, " kg") : "--"} />
+              <StatCard label="Current Weight" value={latest ? `${Number(latest.weight).toFixed(2)} kg` : "--"} />
+              <StatCard label="Weight Change" value={previous ? signedNumber(weightChange, " kg", 2) : "--"} />
               <StatCard label="Current Body Fat" value={latest ? `${Number(latest.body_fat_percentage).toFixed(1)}%` : "--"} />
               <StatCard label="Body Fat Change" value={previous ? signedNumber(bodyFatChange, "%") : "--"} />
             </div>
@@ -141,7 +141,7 @@ export default function WeightPage() {
                       id="weight"
                       type="number"
                       min="1"
-                      step="0.1"
+                      step="0.01"
                       inputMode="decimal"
                       placeholder="82.5"
                       value={weight}
@@ -220,7 +220,7 @@ export default function WeightPage() {
                         <div>
                           <p className="font-medium text-white">{formatDate(log.created_at)}</p>
                           <p className="mt-1 text-sm text-muted">
-                            {Number(log.weight).toFixed(1)} kg · {Number(log.body_fat_percentage).toFixed(1)}%
+                            {Number(log.weight).toFixed(2)} kg · {Number(log.body_fat_percentage).toFixed(1)}%
                           </p>
                         </div>
                         <div className="flex items-center gap-1">

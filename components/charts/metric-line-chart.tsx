@@ -44,7 +44,10 @@ export function MetricLineChart({ data, dataKey, suffix }: MetricLineChartProps)
               borderRadius: 8,
               color: "#fff"
             }}
-            formatter={(value) => [`${Number(value).toFixed(1)}${suffix}`, dataKey === "weight" ? "Weight" : "Body Fat"]}
+            formatter={(value) => [
+              `${Number(value).toFixed(dataKey === "weight" ? 2 : 1)}${suffix}`,
+              dataKey === "weight" ? "Weight" : "Body Fat"
+            ]}
           />
           <Area
             type="monotone"
