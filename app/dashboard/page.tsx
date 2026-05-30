@@ -38,9 +38,9 @@ function MetricRing({
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
-      className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-white/10 bg-[#20292e] px-2 py-4 shadow-premium sm:min-h-64 sm:px-4 sm:py-8"
+      className="flex min-h-48 flex-col items-center justify-center rounded-lg border border-white/10 bg-[#20292e] px-2 py-4 shadow-premium sm:min-h-64 sm:px-4 sm:py-8"
     >
-      <div className="relative grid h-24 w-24 place-items-center min-[390px]:h-28 min-[390px]:w-28 sm:h-52 sm:w-52 lg:h-64 lg:w-64">
+      <div className="relative grid h-24 w-24 place-items-center min-[390px]:h-28 min-[390px]:w-28 sm:h-48 sm:w-48 lg:h-60 lg:w-60">
         <svg viewBox="0 0 220 220" className="h-full w-full -rotate-90">
           <circle cx="110" cy="110" r={radius} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="14" />
           <motion.circle
@@ -58,16 +58,14 @@ function MetricRing({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="max-w-[5.5rem] text-[8px] font-semibold uppercase tracking-[0.12em] text-white/45 sm:max-w-[11rem] sm:text-[10px] sm:tracking-[0.18em]">
-            {label}
-          </p>
-          <p className="mt-1 text-xl font-semibold leading-none tracking-normal text-white min-[390px]:text-2xl sm:mt-2 sm:text-4xl lg:text-6xl">
+          <p className="text-2xl font-semibold leading-none tracking-normal text-white min-[390px]:text-3xl sm:text-5xl lg:text-6xl">
             {value}
           </p>
-          <p className="mt-1 max-w-[5.8rem] text-[8px] font-medium leading-tight text-white/50 sm:mt-3 sm:max-w-[11rem] sm:text-sm">
-            {detail}
-          </p>
         </div>
+      </div>
+      <div className="mt-3 min-h-10 text-center sm:mt-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55 sm:text-xs sm:tracking-[0.18em]">{label}</p>
+        <p className="mt-1 text-[10px] font-medium leading-tight text-white/60 sm:text-sm">{detail}</p>
       </div>
     </motion.div>
   );
