@@ -252,7 +252,7 @@ export default function WorkoutsPage() {
                     </motion.div>
                   ))
                 ) : (
-                  <EmptyState title="No workouts yet">Start today's session or mark a rest day to begin the history.</EmptyState>
+                  <EmptyState title="No workouts yet">Start today&apos;s session or mark a rest day to begin the history.</EmptyState>
                 )}
               </CardContent>
             </Card>
