@@ -1,13 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, BarChart3, HeartPulse, Home, LogOut, Scale } from "lucide-react";
+import { Activity, BarChart3, Download, HeartPulse, Home, Loader2, LogOut, Menu, Scale } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { downloadUserExcelReport } from "@/services/export-report";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -20,10 +22,25 @@ const navItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   async function signOut() {
     await getSupabaseBrowserClient().auth.signOut();
     router.replace("/login");
+  }
+
+  async function exportReport() {
+    setExporting(true);
+    try {
+      await downloadUserExcelReport();
+      setMenuOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to export Excel report.";
+      window.alert(message);
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
@@ -53,9 +70,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-          <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="relative">
+            <Button variant="ghost" size="icon" onClick={() => setMenuOpen((open) => !open)} aria-label="Open account menu">
+              <Menu className="h-5 w-5" />
+            </Button>
+            {menuOpen ? (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute right-0 top-12 z-50 w-72 overflow-hidden rounded-lg border border-white/10 bg-black/95 p-2 shadow-premium backdrop-blur-xl"
+              >
+                <button
+                  type="button"
+                  onClick={exportReport}
+                  disabled={exporting}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-left text-sm text-white transition hover:bg-white/[0.08] disabled:opacity-50"
+                >
+                  {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  <span>{exporting ? "Preparing Excel..." : "Download Excel report"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-left text-sm text-red-100 transition hover:bg-red-500/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign out</span>
+                </button>
+              </motion.div>
+            ) : null}
+          </div>
         </div>
       </header>
 
