@@ -1,4 +1,4 @@
-import type { Exercise, ExerciseLog, Profile, WeightLog, Workout } from "@/types/domain";
+import type { CardioLog, Exercise, ExerciseLog, Profile, WeightLog, Workout } from "@/types/domain";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -15,6 +15,12 @@ export type Database = {
         Row: WeightLog;
         Insert: Pick<WeightLog, "user_id" | "weight" | "body_fat_percentage"> & Partial<Pick<WeightLog, "id" | "created_at">>;
         Update: Partial<Pick<WeightLog, "weight" | "body_fat_percentage">>;
+        Relationships: [];
+      };
+      cardio_logs: {
+        Row: CardioLog;
+        Insert: Pick<CardioLog, "user_id" | "machine_type" | "duration_minutes"> & Partial<Pick<CardioLog, "id" | "created_at">>;
+        Update: Partial<Pick<CardioLog, "machine_type" | "duration_minutes">>;
         Relationships: [];
       };
       workouts: {

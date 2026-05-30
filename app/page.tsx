@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Activity, ArrowRight, BarChart3, Scale } from "lucide-react";
+import { Activity, ArrowRight, BarChart3, HeartPulse, Scale } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,6 +18,12 @@ const cards = [
     title: "Workout Tracking",
     description: "Start today's split, record every set, compare with the last session, or mark recovery.",
     icon: Activity
+  },
+  {
+    href: "/cardio",
+    title: "Cardio Tracking",
+    description: "Log the cardio machine and duration with a clean automatic timeline.",
+    icon: HeartPulse
   }
 ];
 
@@ -47,7 +53,7 @@ export default function HomePage() {
           </Link>
         </motion.div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           {cards.map((card, index) => {
             const Icon = card.icon;
             return (

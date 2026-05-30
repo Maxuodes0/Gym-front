@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, BarChart3, Home, LogOut, Scale } from "lucide-react";
+import { Activity, BarChart3, HeartPulse, Home, LogOut, Scale } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
@@ -13,6 +13,7 @@ const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { href: "/weight", label: "Weight", icon: Scale },
+  { href: "/cardio", label: "Cardio", icon: HeartPulse },
   { href: "/workouts", label: "Workout", icon: Activity }
 ];
 
@@ -70,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </motion.main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/85 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl md:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
+        <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href;

@@ -16,6 +16,14 @@ export type WeightLog = {
   created_at: string;
 };
 
+export type CardioLog = {
+  id: string;
+  user_id: string;
+  machine_type: string;
+  duration_minutes: number;
+  created_at: string;
+};
+
 export type Workout = {
   id: string;
   user_id: string;
