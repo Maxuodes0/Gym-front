@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createWeightLog, deleteWeightLog, getWeightLogs, updateWeightLog } from "@/services/weights";
 import type { WeightLog } from "@/types/domain";
@@ -29,7 +28,6 @@ export default function WeightPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [weight, setWeight] = useState("");
   const [bodyFat, setBodyFat] = useState("");
-  const [averageWeek, setAverageWeek] = useState("1");
   const [error, setError] = useState("");
 
   async function refresh() {
@@ -41,14 +39,6 @@ export default function WeightPage() {
       .catch((err) => setError(err instanceof Error ? err.message : "Unable to load weight logs."))
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    const latestLog = logs.at(-1);
-    if (!latestLog) return;
-
-    const selectedWeekHasEntries = logs.some((log) => weekOfMonth(log.created_at) === Number(averageWeek));
-    if (!selectedWeekHasEntries) setAverageWeek(String(weekOfMonth(latestLog.created_at)));
-  }, [averageWeek, logs]);
 
   const latest = logs.at(-1);
   const previous = logs.at(-2);
@@ -67,20 +57,12 @@ export default function WeightPage() {
   );
 
   const averageWeekData = useMemo(() => {
-    const selectedWeek = Number(averageWeek);
+    const selectedWeek = latest ? weekOfMonth(latest.created_at) : 1;
     const points = chartData.filter((point) => weekOfMonth(point.date) === selectedWeek);
     const average = points.length ? points.reduce((sum, point) => sum + (point.weight ?? 0), 0) / points.length : 0;
 
     return { points, average };
-  }, [averageWeek, chartData]);
-
-  const weekOptions = [
-    { value: "1", label: "First Week" },
-    { value: "2", label: "Second Week" },
-    { value: "3", label: "Third Week" },
-    { value: "4", label: "Fourth Week" },
-    { value: "5", label: "Fifth Week" }
-  ];
+  }, [chartData, latest]);
 
   function startEdit(log: WeightLog) {
     setEditingId(log.id);
@@ -147,47 +129,28 @@ export default function WeightPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          <Card>
-            <CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle>Average Weight</CardTitle>
-                <p className="mt-1 text-sm text-muted">
-                  {averageWeekData.points.length ? `${averageWeekData.average.toFixed(2)} kg average` : "No entries in this week"}
-                </p>
-              </div>
-              <Select className="sm:w-44" value={averageWeek} onChange={(event) => setAverageWeek(event.target.value)}>
-                {weekOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                <MetricRing
-                  label="Average Weight"
-                  value={averageWeekData.points.length ? averageWeekData.average.toFixed(2) : "--"}
-                  detail={averageWeekData.points.length ? `${averageWeekData.points.length} entries | kg` : "select another week"}
-                  progress={averageWeekData.points.length ? clamp((averageWeekData.average / 120) * 100, 8, 96) : 0}
-                  accent="#93B5CF"
-                />
-                <MetricRing
-                  label="Weight"
-                  value={latest ? Number(latest.weight).toFixed(2) : "--"}
-                  detail={previous ? `${signedNumber(weightChange, " kg", 2)} change` : "kg"}
-                  progress={latest ? clamp((Number(latest.weight) / 120) * 100, 8, 96) : 0}
-                />
-                <MetricRing
-                  label="Body Fat"
-                  value={latest ? `${Number(latest.body_fat_percentage).toFixed(1)}%` : "--"}
-                  detail={previous ? `${signedNumber(bodyFatChange, "%")} change` : "current percentage"}
-                  progress={latest ? clamp(100 - Number(latest.body_fat_percentage) * 2.2, 12, 92) : 0}
-                  accent="#B7BDC1"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <MetricRing
+              label="Average Weight"
+              value={averageWeekData.points.length ? averageWeekData.average.toFixed(2) : "--"}
+              detail={averageWeekData.points.length ? `${averageWeekData.points.length} entries | kg` : "latest week"}
+              progress={averageWeekData.points.length ? clamp((averageWeekData.average / 120) * 100, 8, 96) : 0}
+              accent="#93B5CF"
+            />
+            <MetricRing
+              label="Weight"
+              value={latest ? Number(latest.weight).toFixed(2) : "--"}
+              detail={previous ? `${signedNumber(weightChange, " kg", 2)} change` : "kg"}
+              progress={latest ? clamp((Number(latest.weight) / 120) * 100, 8, 96) : 0}
+            />
+            <MetricRing
+              label="Body Fat"
+              value={latest ? `${Number(latest.body_fat_percentage).toFixed(1)}%` : "--"}
+              detail={previous ? `${signedNumber(bodyFatChange, "%")} change` : "current percentage"}
+              progress={latest ? clamp(100 - Number(latest.body_fat_percentage) * 2.2, 12, 92) : 0}
+              accent="#B7BDC1"
+            />
+          </div>
 
           <div className="grid gap-4 lg:grid-cols-[0.78fr_1.22fr]">
             <div className="space-y-4">
