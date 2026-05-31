@@ -18,6 +18,11 @@ import { createWeightLog, deleteWeightLog, getWeightLogs, updateWeightLog } from
 import type { WeightLog } from "@/types/domain";
 import { formatDate, formatShortDate, signedNumber } from "@/lib/utils";
 
+function weekOfMonth(date: string) {
+  const day = new Date(date).getDate();
+  return Math.floor((day - 1) / 7) + 1;
+}
+
 export default function WeightPage() {
   const [logs, setLogs] = useState<WeightLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +43,14 @@ export default function WeightPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    const latestLog = logs.at(-1);
+    if (!latestLog) return;
+
+    const selectedWeekHasEntries = logs.some((log) => weekOfMonth(log.created_at) === Number(averageWeek));
+    if (!selectedWeekHasEntries) setAverageWeek(String(weekOfMonth(latestLog.created_at)));
+  }, [averageWeek, logs]);
+
   const latest = logs.at(-1);
   const previous = logs.at(-2);
   const weightChange = latest && previous ? Number(latest.weight) - Number(previous.weight) : 0;
@@ -56,10 +69,7 @@ export default function WeightPage() {
 
   const averageWeekData = useMemo(() => {
     const selectedWeek = Number(averageWeek);
-    const points = chartData.filter((point) => {
-      const day = new Date(point.date).getDate();
-      return Math.floor((day - 1) / 7) + 1 === selectedWeek;
-    });
+    const points = chartData.filter((point) => weekOfMonth(point.date) === selectedWeek);
     const average = points.length ? points.reduce((sum, point) => sum + (point.weight ?? 0), 0) / points.length : 0;
 
     return { points, average };
