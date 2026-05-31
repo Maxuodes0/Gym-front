@@ -6,7 +6,6 @@ import { Edit3, Plus, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/layout/empty-state";
 import { clamp, MetricRing } from "@/components/layout/metric-ring";
-import { AverageWeightChart } from "@/components/charts/average-weight-chart";
 import { MetricLineChart } from "@/components/charts/metric-line-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -258,11 +257,19 @@ export default function WeightPage() {
                 </Select>
               </CardHeader>
               <CardContent>
-                {averageWeekData.points.length ? (
-                  <AverageWeightChart data={averageWeekData.points} average={averageWeekData.average} />
-                ) : (
-                  <EmptyState title="No weekly data">Add weight entries in the selected week to calculate its average.</EmptyState>
-                )}
+                <div className="grid place-items-center">
+                  {averageWeekData.points.length ? (
+                    <MetricRing
+                      label="Average Weight"
+                      value={averageWeekData.average.toFixed(2)}
+                      detail={`${averageWeekData.points.length} entries | kg`}
+                      progress={clamp((averageWeekData.average / 120) * 100, 8, 96)}
+                      accent="#93B5CF"
+                    />
+                  ) : (
+                    <EmptyState title="No weekly data">Add weight entries in the selected week to calculate its average.</EmptyState>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
