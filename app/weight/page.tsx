@@ -6,11 +6,13 @@ import { Edit3, Plus, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/layout/empty-state";
 import { clamp, MetricRing } from "@/components/layout/metric-ring";
+import { AverageWeightChart } from "@/components/charts/average-weight-chart";
 import { MetricLineChart } from "@/components/charts/metric-line-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createWeightLog, deleteWeightLog, getWeightLogs, updateWeightLog } from "@/services/weights";
 import type { WeightLog } from "@/types/domain";
@@ -23,6 +25,7 @@ export default function WeightPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [weight, setWeight] = useState("");
   const [bodyFat, setBodyFat] = useState("");
+  const [averageWeek, setAverageWeek] = useState("1");
   const [error, setError] = useState("");
 
   async function refresh() {
@@ -50,6 +53,25 @@ export default function WeightPage() {
       })),
     [logs]
   );
+
+  const averageWeekData = useMemo(() => {
+    const selectedWeek = Number(averageWeek);
+    const points = chartData.filter((point) => {
+      const day = new Date(point.date).getDate();
+      return Math.floor((day - 1) / 7) + 1 === selectedWeek;
+    });
+    const average = points.length ? points.reduce((sum, point) => sum + (point.weight ?? 0), 0) / points.length : 0;
+
+    return { points, average };
+  }, [averageWeek, chartData]);
+
+  const weekOptions = [
+    { value: "1", label: "First Week" },
+    { value: "2", label: "Second Week" },
+    { value: "3", label: "Third Week" },
+    { value: "4", label: "Fourth Week" },
+    { value: "5", label: "Fifth Week" }
+  ];
 
   function startEdit(log: WeightLog) {
     setEditingId(log.id);
@@ -205,6 +227,31 @@ export default function WeightPage() {
                   <MetricLineChart data={chartData} dataKey="bodyFat" suffix="%" />
                 ) : (
                   <EmptyState title="No entries yet">Your body fat trend appears after the first saved entry.</EmptyState>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle>Average Weight</CardTitle>
+                  <p className="mt-1 text-sm text-muted">
+                    {averageWeekData.points.length ? `${averageWeekData.average.toFixed(2)} kg average` : "No entries in this week"}
+                  </p>
+                </div>
+                <Select className="sm:w-44" value={averageWeek} onChange={(event) => setAverageWeek(event.target.value)}>
+                  {weekOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </CardHeader>
+              <CardContent>
+                {averageWeekData.points.length ? (
+                  <AverageWeightChart data={averageWeekData.points} average={averageWeekData.average} />
+                ) : (
+                  <EmptyState title="No weekly data">Add weight entries in the selected week to calculate its average.</EmptyState>
                 )}
               </CardContent>
             </Card>
