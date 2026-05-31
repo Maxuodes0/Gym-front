@@ -16,11 +16,6 @@ import { createWeightLog, deleteWeightLog, getWeightLogs, updateWeightLog } from
 import type { WeightLog } from "@/types/domain";
 import { formatDate, formatShortDate, signedNumber } from "@/lib/utils";
 
-function weekOfMonth(date: string) {
-  const day = new Date(date).getDate();
-  return Math.floor((day - 1) / 7) + 1;
-}
-
 export default function WeightPage() {
   const [logs, setLogs] = useState<WeightLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,12 +52,11 @@ export default function WeightPage() {
   );
 
   const averageWeekData = useMemo(() => {
-    const selectedWeek = latest ? weekOfMonth(latest.created_at) : 1;
-    const points = chartData.filter((point) => weekOfMonth(point.date) === selectedWeek);
+    const points = chartData.slice(-7);
     const average = points.length ? points.reduce((sum, point) => sum + (point.weight ?? 0), 0) / points.length : 0;
 
     return { points, average };
-  }, [chartData, latest]);
+  }, [chartData]);
 
   function startEdit(log: WeightLog) {
     setEditingId(log.id);
@@ -133,7 +127,7 @@ export default function WeightPage() {
             <MetricRing
               label="Average Weight"
               value={averageWeekData.points.length ? averageWeekData.average.toFixed(2) : "--"}
-              detail={averageWeekData.points.length ? `${averageWeekData.points.length} entries | kg` : "latest week"}
+              detail={averageWeekData.points.length ? `last ${averageWeekData.points.length} entries | kg` : "last 7 entries"}
               progress={averageWeekData.points.length ? clamp((averageWeekData.average / 120) * 100, 8, 96) : 0}
               accent="#93B5CF"
             />
