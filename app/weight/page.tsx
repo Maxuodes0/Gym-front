@@ -174,7 +174,7 @@ export default function WeightPage() {
                       min="1"
                       step="0.01"
                       inputMode="decimal"
-                      placeholder="82.5"
+                      placeholder={latest ? Number(latest.weight).toFixed(2) : "Weight"}
                       value={weight}
                       onChange={(event) => setWeight(event.target.value)}
                       required
@@ -189,7 +189,7 @@ export default function WeightPage() {
                       max="100"
                       step="0.1"
                       inputMode="decimal"
-                      placeholder="16.5"
+                      placeholder={latest ? Number(latest.body_fat_percentage).toFixed(1) : "Body fat"}
                       value={bodyFat}
                       onChange={(event) => setBodyFat(event.target.value)}
                       required
