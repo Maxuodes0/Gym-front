@@ -28,8 +28,12 @@ import type { Exercise, Workout, WorkoutType, WorkoutWithLogs } from "@/types/do
 
 type SetState = Record<string, Record<number, { weight: string; reps: string }>>;
 
+function previousSet(previous: WorkoutWithLogs | null, exerciseId: string, setNumber: number) {
+  return previous?.exercise_logs.find((log) => log.exercise_id === exerciseId && log.set_number === setNumber) ?? null;
+}
+
 function previousSetLabel(previous: WorkoutWithLogs | null, exerciseId: string, setNumber: number) {
-  const row = previous?.exercise_logs.find((log) => log.exercise_id === exerciseId && log.set_number === setNumber);
+  const row = previousSet(previous, exerciseId, setNumber);
   if (!row) return "Last: --";
   return `Last: ${Number(row.weight_used).toFixed(1)}kg x ${row.reps_completed}`;
 }
@@ -64,11 +68,11 @@ export default function WorkoutsPage() {
     setStarting(true);
 
     try {
-      const [workout, plan, previous] = await Promise.all([
-        createWorkout(selectedType),
+      const [plan, previous] = await Promise.all([
         getExercises(selectedType),
         getPreviousWorkoutByType(selectedType)
       ]);
+      const workout = await createWorkout(selectedType);
       setActiveWorkout(workout);
       setExercises(plan);
       setPreviousWorkout(previous);
@@ -292,6 +296,7 @@ export default function WorkoutsPage() {
                       <div className="space-y-3">
                         {Array.from({ length: exercise.sets }).map((_, setIndex) => {
                           const setNumber = setIndex + 1;
+                          const lastSet = previousSet(previousWorkout, exercise.id, setNumber);
                           return (
                             <div key={setNumber} className="grid grid-cols-[3.5rem_1fr_1fr] items-end gap-2">
                               <div className="pb-3 text-sm font-semibold text-muted">Set {setNumber}</div>
@@ -302,6 +307,7 @@ export default function WorkoutsPage() {
                                   inputMode="decimal"
                                   min="0"
                                   step="0.5"
+                                  placeholder={lastSet ? Number(lastSet.weight_used).toFixed(1) : "Kg"}
                                   value={sets[exercise.id]?.[setNumber]?.weight ?? ""}
                                   onChange={(event) => updateSet(exercise.id, setNumber, "weight", event.target.value)}
                                 />
@@ -313,6 +319,7 @@ export default function WorkoutsPage() {
                                   inputMode="numeric"
                                   min="0"
                                   step="1"
+                                  placeholder={lastSet ? String(lastSet.reps_completed) : "Reps"}
                                   value={sets[exercise.id]?.[setNumber]?.reps ?? ""}
                                   onChange={(event) => updateSet(exercise.id, setNumber, "reps", event.target.value)}
                                 />
