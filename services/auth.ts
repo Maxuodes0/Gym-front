@@ -1,6 +1,7 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const usernameAliases: Record<string, string> = {
+  bushrauei: "bushrauei@tura.app",
   xebec: "xebec@tura.app"
 };
 
@@ -25,4 +26,12 @@ export async function getCurrentUserId() {
   if (!data.user) throw new Error("No authenticated user found.");
 
   return data.user.id;
+}
+
+export async function getCurrentUserEmail() {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) throw error;
+  return data.user?.email ?? null;
 }
