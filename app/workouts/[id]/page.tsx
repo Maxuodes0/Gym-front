@@ -10,9 +10,11 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getWorkoutDisplayType } from "@/lib/constants";
+import { formatDate, signedNumber } from "@/lib/utils";
+import { getCurrentUserEmail } from "@/services/auth";
 import { getPreviousWorkoutByType, getWorkoutDetails } from "@/services/workouts";
 import type { ExerciseLog, WorkoutWithLogs } from "@/types/domain";
-import { formatDate, signedNumber } from "@/lib/utils";
 
 function setLabel(log?: ExerciseLog) {
   if (!log) return "--";
@@ -23,13 +25,15 @@ export default function WorkoutDetailsPage() {
   const params = useParams<{ id: string }>();
   const [workout, setWorkout] = useState<WorkoutWithLogs | null>(null);
   const [previous, setPrevious] = useState<WorkoutWithLogs | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     async function load() {
       try {
-        const details = await getWorkoutDetails(params.id);
+        const [details, email] = await Promise.all([getWorkoutDetails(params.id), getCurrentUserEmail()]);
+        setUserEmail(email);
         setWorkout(details);
         if (!details.is_rest_day) {
           setPrevious(await getPreviousWorkoutByType(details.workout_type, details.id));
@@ -81,7 +85,7 @@ export default function WorkoutDetailsPage() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted">Workout Details</p>
-                {workout.is_rest_day ? <Badge>Recovery</Badge> : <Badge>{workout.workout_type}</Badge>}
+                {workout.is_rest_day ? <Badge>Recovery</Badge> : <Badge>{getWorkoutDisplayType(workout.workout_type, userEmail)}</Badge>}
               </div>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white md:text-5xl">{formatDate(workout.workout_date)}</h1>
             </div>

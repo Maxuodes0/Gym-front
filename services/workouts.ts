@@ -1,8 +1,14 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { isBushraueiEmail } from "@/lib/constants";
 import { getCurrentUserId } from "@/services/auth";
 import type { Exercise, ExerciseLog, Workout, WorkoutType, WorkoutWithLogs } from "@/types/domain";
 
 const hiddenExercises = new Set(["Push A::Cable Crossover (Low to High)"]);
+const bushraueiExerciseMarker = "[TURA_USER:BUSHRAUEI]";
+
+function cleanExerciseNote(notes: string | null) {
+  return notes?.replace(bushraueiExerciseMarker, "").trim() || null;
+}
 
 export type SetInput = {
   exercise_id: string;
@@ -11,7 +17,7 @@ export type SetInput = {
   reps_completed: number;
 };
 
-export async function getExercises(workoutType: WorkoutType) {
+export async function getExercises(workoutType: Exclude<WorkoutType, "Rest Day">, email?: string | null) {
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase
     .from("exercises")
@@ -20,7 +26,19 @@ export async function getExercises(workoutType: WorkoutType) {
     .order("sort_order", { ascending: true });
 
   if (error) throw error;
-  return (data as Exercise[]).filter((exercise) => !hiddenExercises.has(`${exercise.workout_type}::${exercise.name}`));
+  const isBushrauei = isBushraueiEmail(email);
+
+  return (data as Exercise[])
+    .filter((exercise) => {
+      const hasBushraueiMarker = exercise.notes?.includes(bushraueiExerciseMarker) ?? false;
+      if (isBushrauei) return hasBushraueiMarker;
+
+      return !hasBushraueiMarker && !hiddenExercises.has(`${exercise.workout_type}::${exercise.name}`);
+    })
+    .map((exercise) => ({
+      ...exercise,
+      notes: cleanExerciseNote(exercise.notes)
+    }));
 }
 
 export async function getWorkouts() {

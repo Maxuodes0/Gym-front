@@ -13,8 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { workoutTypes } from "@/lib/constants";
+import { getWorkoutDisplayType, getWorkoutOptionsForEmail, workoutOptions, type WorkoutOption } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
+import { getCurrentUserEmail } from "@/services/auth";
 import {
   createRestDay,
   createWorkout,
@@ -40,7 +41,9 @@ function previousSetLabel(previous: WorkoutWithLogs | null, exerciseId: string, 
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [workoutTypeOptions, setWorkoutTypeOptions] = useState<WorkoutOption[]>(workoutOptions);
   const [selectedType, setSelectedType] = useState<Exclude<WorkoutType, "Rest Day">>("Push A");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
   const [previousWorkout, setPreviousWorkout] = useState<WorkoutWithLogs | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -55,7 +58,13 @@ export default function WorkoutsPage() {
   }
 
   useEffect(() => {
-    refreshHistory()
+    Promise.all([refreshHistory(), getCurrentUserEmail()])
+      .then(([, email]) => {
+        setUserEmail(email);
+        const options = getWorkoutOptionsForEmail(email);
+        setWorkoutTypeOptions(options);
+        setSelectedType((current) => (options.some((option) => option.value === current) ? current : options[0].value));
+      })
       .catch((err) => setError(err instanceof Error ? err.message : "Unable to load workouts."))
       .finally(() => setLoading(false));
   }, []);
@@ -69,7 +78,7 @@ export default function WorkoutsPage() {
 
     try {
       const [plan, previous] = await Promise.all([
-        getExercises(selectedType),
+        getExercises(selectedType, userEmail),
         getPreviousWorkoutByType(selectedType)
       ]);
       const workout = await createWorkout(selectedType);
@@ -199,9 +208,9 @@ export default function WorkoutsPage() {
                     value={selectedType}
                     onChange={(event) => setSelectedType(event.target.value as Exclude<WorkoutType, "Rest Day">)}
                   >
-                    {workoutTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
+                    {workoutTypeOptions.map((type) => (
+                      <option key={`${type.label}-${type.value}`} value={type.value}>
+                        {type.label}
                       </option>
                     ))}
                   </Select>
@@ -236,7 +245,7 @@ export default function WorkoutsPage() {
                     >
                       <Link href={`/workouts/${workout.id}`} className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-medium text-white">{workout.workout_type}</p>
+                          <p className="font-medium text-white">{getWorkoutDisplayType(workout.workout_type, userEmail)}</p>
                           {workout.is_rest_day ? <Badge>Recovery</Badge> : null}
                         </div>
                         <p className="mt-1 text-sm text-muted">{formatDate(workout.workout_date)}</p>
@@ -267,7 +276,7 @@ export default function WorkoutsPage() {
               <Card>
                 <CardHeader className="flex-row items-center justify-between">
                   <div>
-                    <CardTitle>{activeWorkout.workout_type}</CardTitle>
+                    <CardTitle>{getWorkoutDisplayType(activeWorkout.workout_type, userEmail)}</CardTitle>
                     <p className="mt-1 text-sm text-muted">{formatDate(activeWorkout.workout_date)}</p>
                   </div>
                   <Dumbbell className="h-6 w-6 text-white/50" />
@@ -288,7 +297,7 @@ export default function WorkoutsPage() {
                             {exercise.sets} sets · {exercise.reps} reps
                           </p>
                         </div>
-                        <Badge>{exercise.workout_type}</Badge>
+                        <Badge>{getWorkoutDisplayType(exercise.workout_type, userEmail)}</Badge>
                       </div>
 
                       {exercise.notes ? <p className="mb-4 text-sm leading-6 text-muted">{exercise.notes}</p> : null}
