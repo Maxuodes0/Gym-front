@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Bed, Check, Dumbbell, Play, Trash2 } from "lucide-react";
+import { ArrowRight, Bed, Check, Dumbbell, HeartPulse, Play, Plus, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getWorkoutDisplayType, getWorkoutOptionsForEmail, workoutOptions, type WorkoutOption } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { getCurrentUserEmail } from "@/services/auth";
+import { createCardioLog } from "@/services/cardio";
 import {
   createRestDay,
   createWorkout,
@@ -51,6 +52,10 @@ export default function WorkoutsPage() {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showCardioForm, setShowCardioForm] = useState(false);
+  const [cardioMachine, setCardioMachine] = useState("");
+  const [cardioDuration, setCardioDuration] = useState("");
+  const [savingCardio, setSavingCardio] = useState(false);
   const [error, setError] = useState("");
 
   async function refreshHistory() {
@@ -156,6 +161,27 @@ export default function WorkoutsPage() {
     }
   }
 
+  async function saveQuickCardio(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setSavingCardio(true);
+
+    try {
+      const durationValue = Number(cardioDuration);
+      if (!cardioMachine.trim()) throw new Error("Enter the cardio machine type.");
+      if (!durationValue || durationValue <= 0) throw new Error("Enter a valid cardio duration.");
+
+      await createCardioLog(cardioMachine, durationValue);
+      setCardioMachine("");
+      setCardioDuration("");
+      setShowCardioForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to save cardio entry.");
+    } finally {
+      setSavingCardio(false);
+    }
+  }
+
   async function removeWorkout(id: string) {
     setError("");
     try {
@@ -216,16 +242,75 @@ export default function WorkoutsPage() {
                   </Select>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Button onClick={startWorkout} disabled={starting}>
-                    <Play className="h-4 w-4" />
-                    {starting ? "Starting..." : "Start workout"}
-                  </Button>
-                  <Button variant="secondary" onClick={markRestDay} disabled={starting}>
-                    <Bed className="h-4 w-4" />
-                    Rest Day
+                <div className="space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Button onClick={startWorkout} disabled={starting}>
+                      <Play className="h-4 w-4" />
+                      {starting ? "Starting..." : "Start workout"}
+                    </Button>
+                    <Button variant="secondary" onClick={markRestDay} disabled={starting}>
+                      <Bed className="h-4 w-4" />
+                      Rest Day
+                    </Button>
+                  </div>
+
+                  <Button type="button" variant="secondary" className="w-full" onClick={() => setShowCardioForm((current) => !current)}>
+                    <HeartPulse className="h-4 w-4" />
+                    Log cardio
                   </Button>
                 </div>
+
+                {showCardioForm ? (
+                  <motion.form
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="space-y-4 rounded-md border border-white/10 bg-black/30 p-4"
+                    onSubmit={saveQuickCardio}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-white">Quick cardio</p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowCardioForm(false)}
+                        aria-label="Close cardio form"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quick-cardio-machine">Cardio Machine</Label>
+                      <Input
+                        id="quick-cardio-machine"
+                        type="text"
+                        placeholder="Treadmill"
+                        value={cardioMachine}
+                        onChange={(event) => setCardioMachine(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quick-cardio-duration">Time Minutes</Label>
+                      <Input
+                        id="quick-cardio-duration"
+                        type="number"
+                        min="1"
+                        step="0.5"
+                        inputMode="decimal"
+                        placeholder="30"
+                        value={cardioDuration}
+                        onChange={(event) => setCardioDuration(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button className="w-full" disabled={savingCardio}>
+                      <Plus className="h-4 w-4" />
+                      {savingCardio ? "Saving..." : "Save cardio"}
+                    </Button>
+                  </motion.form>
+                ) : null}
               </CardContent>
             </Card>
 
